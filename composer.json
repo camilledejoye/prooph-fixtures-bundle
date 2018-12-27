@@ -1,0 +1,51 @@
+{
+    "name": "elythyr/prooph-fixtures-bundle",
+    "description": "Symfony bundle for elythyr/prooph-fixtures",
+    "type": "symfony-bundle",
+    "authors": [
+        {
+            "name": "Camille Dejoye",
+            "email": "cdejoye@houra.fr"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:elythyr/prooph-fixtures.git"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "elythyr/prooph-fixtures": "dev-master",
+        "prooph/event-store": "^7.5",
+        "psr/container": "^1.0",
+        "symfony/lock": "^4.2"
+    },
+    "require-dev": {
+        "phpunit/php-invoker": "^2.0",
+        "phpunit/phpunit": "^7.5",
+        "prooph/php-cs-fixer-config": "^0.3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Prooph\\Bundle\\Fixtures\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Prooph\\Bundle\\Fixtures\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "check": [
+            "@cs",
+            "@test"
+        ],
+        "cs": "php-cs-fixer fix -v --diff --dry-run",
+        "cs-fix": "php-cs-fixer fix -v --diff",
+        "test": "phpunit"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

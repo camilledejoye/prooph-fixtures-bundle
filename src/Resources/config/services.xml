@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <service id="Prooph\Fixtures\Locator\FixturesLocator" alias="prooph_fixtures.fixtures_locator" public="false" />
+
+        <service id="prooph_fixtures.event_streams_cleaner" class="Prooph\Fixtures\Cleaner\EventStreamsCleaner" public="false">
+            <argument type="service" id="Prooph\EventStore\EventStore" />
+        </service>
+        <service id="prooph_fixtures.projections_cleaner" class="Prooph\Fixtures\Cleaner\ProjectionsCleaner" public="false">
+            <argument type="service" id="prooph_event_store.projection_managers_locator" />
+            <argument>%prooph_event_store.projection_managers%</argument>
+        </service>
+        <service id="prooph_fixtures.chain_cleaner" class="Prooph\Fixtures\Cleaner\ChainCleaner" public="false">
+            <argument type="collection">
+                <argument type="service"
+                          key="Prooph\Fixtures\Cleaner\EventStreamsCleaner"
+                          id="prooph_fixtures.event_streams_cleaner" />
+                <argument type="service"
+                          key="Prooph\Fixtures\Cleaner\ProjectionsCleaner"
+                          id="prooph_fixtures.projections_cleaner" />
+            </argument>
+        </service>
+        <service id="Prooph\Fixtures\Cleaner\Cleaner" alias="prooph_fixtures.chain_cleaner" public="false" />
+
+        <service id="prooph_fixtures.fixtures_manager" class="Prooph\Fixtures\FixturesManager" public="false">
+            <argument type="service" id="prooph_fixtures.fixtures_locator" />
+            <argument type="service" id="prooph_fixtures.chain_cleaner" />
+        </service>
+        <service id="Prooph\Fixtures\FixturesManager" alias="prooph_fixtures.fixtures_manager" public="false" />
+
+        <service id="Prooph\Bundle\Fixtures\Command\LoadFixturesCommand" public="false">
+            <argument type="service" id="prooph_fixtures.fixtures_manager" />
+            <tag name="console.command" command="event-store:fixtures:load" />
+        </service>
+    </services>
+</container>
