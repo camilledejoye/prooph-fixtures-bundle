@@ -2,6 +2,7 @@
     "name": "elythyr/prooph-fixtures-bundle",
     "description": "Symfony bundle for elythyr/prooph-fixtures",
     "type": "symfony-bundle",
+    "license": "MIT",
     "authors": [
         {
             "name": "Camille Dejoye",
