@@ -27,5 +27,27 @@ class ProophFixturesExtension extends Extension
 
         $container->registerForAutoconfiguration(Fixture::class)
             ->addTag(FixturesPass::FIXTURE_TAG);
+
+        $configuration = $this->getConfiguration($configs, $container);
+        $config = $this->processConfiguration($configuration, $configs);
+
+        $this->configureCleaners($config['cleaners'], $container);
+    }
+
+    private function configureCleaners(array $config, ContainerBuilder $container): void
+    {
+        $defaultCleanerBatchSize = $config['default']['batch_size'] ?? null;
+        $eventStreamsCleanerBatchSize = $config['event_streams']['batch_size'] ?? $defaultCleanerBatchSize;
+        $projectionsCleanerBatchSize = $config['projections']['batch_size'] ?? $defaultCleanerBatchSize;
+
+        if ($eventStreamsCleanerBatchSize) {
+            $container->getDefinition('prooph_fixtures.event_streams_cleaner')
+                ->setArgument(1, $eventStreamsCleanerBatchSize);
+        }
+
+        if ($projectionsCleanerBatchSize) {
+            $container->getDefinition('prooph_fixtures.projections_cleaner')
+                ->setArgument(2, $projectionsCleanerBatchSize);
+        }
     }
 }
