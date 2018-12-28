@@ -3,3 +3,5 @@ composer.lock
 .php_cs.cache
 /phpunit.xml
 /var/
+/build/
+.coveralls.yml
