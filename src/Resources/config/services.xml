@@ -48,9 +48,5 @@
             <argument type="service" id="prooph_fixtures.fixtures_manager" />
             <tag name="console.command" command="event-store:fixtures:load" />
         </service>
-
-
-    <!-- Autowiring -->
-        <service id="Prooph\Fixtures\FixturesManager" alias="prooph_fixtures.fixtures_manager" />
     </services>
 </container>
