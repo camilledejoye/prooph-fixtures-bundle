@@ -4,15 +4,21 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
+    <parameters>
+        <parameter key="prooph_fixtures.batches_size">10000</parameter>
+    </parameters>
+
     <services>
     <!-- Cleaners -->
         <service id="prooph_fixtures.event_streams_cleaner" class="Prooph\Fixtures\Cleaner\EventStreamsCleaner">
             <argument type="service" id="Prooph\EventStore\EventStore" />
+            <argument>%prooph_fixtures.batches_size%</argument>
         </service>
 
         <service id="prooph_fixtures.projections_cleaner" class="Prooph\Fixtures\Cleaner\ProjectionsCleaner">
             <argument type="service" id="prooph_event_store.projection_managers_locator" />
             <argument>%prooph_event_store.projection_managers%</argument>
+            <argument>%prooph_fixtures.batches_size%</argument>
         </service>
 
         <service id="prooph_fixtures.chain_cleaner" class="Prooph\Fixtures\Cleaner\ChainCleaner">

@@ -22,18 +22,8 @@ class ProophFixturesExtension extends Extension
      */
     public function load(array $configs, ContainerBuilder $container)
     {
-        $config = $this->processConfig($configs, $container);
-
         $this->loadServices($container);
         $this->addFixturesAutoconfiguration($container);
-        $this->configureCleaners($config['cleaners'], $container);
-    }
-
-    private function processConfig(array $configs, ContainerBuilder $container)
-    {
-        $configuration = $this->getConfiguration($configs, $container);
-        $config = $this->processConfiguration($configuration, $configs);
-        return $config;
     }
 
     private function loadServices(ContainerBuilder $container)
@@ -46,22 +36,5 @@ class ProophFixturesExtension extends Extension
     {
         $container->registerForAutoconfiguration(Fixture::class)
             ->addTag('prooph_fixtures.fixtures');
-    }
-
-    private function configureCleaners(array $config, ContainerBuilder $container): void
-    {
-        $defaultBatchSize      = $config['default']['batch_size'] ?? null;
-        $eventStreamsBatchSize = $config['event_streams']['batch_size'] ?? $defaultBatchSize;
-        $projectionsBatchSize  = $config['projections']['batch_size'] ?? $defaultBatchSize;
-
-        if ($eventStreamsBatchSize) {
-            $container->getDefinition('prooph_fixtures.event_streams_cleaner')
-                ->setArgument(1, $eventStreamsBatchSize);
-        }
-
-        if ($projectionsBatchSize) {
-            $container->getDefinition('prooph_fixtures.projections_cleaner')
-                ->setArgument(2, $projectionsBatchSize);
-        }
     }
 }

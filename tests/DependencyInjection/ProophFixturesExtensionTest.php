@@ -17,6 +17,22 @@ class ProophFixturesExtensionTest extends TestCase
     /**
      * @test
      */
+    public function it_overrides_the_batches_size_parameter()
+    {
+        $batchesSize = 63217;
+
+        $container = $this->loadContainerFromServicesRegistration(
+            static function (ContainerBuilder $container) use ($batchesSize) : void {
+                $container->setParameter('prooph_fixtures.batches_size', $batchesSize);
+            }
+        );
+
+        $this->assertEquals($batchesSize, $container->getParameter('prooph_fixtures.batches_size'));
+    }
+
+    /**
+     * @test
+     */
     public function it_provides_tagged_fixtures_to_the_locator()
     {
         $container = $this->loadContainerFromServicesRegistration(
