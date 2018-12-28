@@ -25,6 +25,7 @@
         "symfony/lock": "^4.2"
     },
     "require-dev": {
+        "phpunit/php-invoker": "^2.0",
         "phpunit/phpunit": "^7.5",
         "prooph/php-cs-fixer-config": "^0.3.0",
         "symfony/var-dumper": "^4.2"
