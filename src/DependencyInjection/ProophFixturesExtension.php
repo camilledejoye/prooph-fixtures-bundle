@@ -2,13 +2,15 @@
 
 /**
  * This file is part of elythy/prooph-fixtures-bundle.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 declare(strict_types=1);
 
 namespace Prooph\Bundle\Fixtures\DependencyInjection;
 
-use Prooph\Bundle\Fixtures\DependencyInjection\Compiler\FixturesPass;
 use Prooph\Fixtures\Fixture\Fixture;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;

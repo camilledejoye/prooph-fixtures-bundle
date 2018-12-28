@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * This file is part of elythy/prooph-fixtures-bundle.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+declare(strict_types=1);
+
 namespace Prooph\Bundle\Fixtures\Tests;
 
 use Prooph\Bundle\Fixtures\ProophFixturesBundle;
@@ -15,14 +24,14 @@ class ProophFixturesTestingKernel extends Kernel
     /** @var callable */
     private $registerServicesCallback;
 
-    public function registerBundles() : array
+    public function registerBundles(): array
     {
         return [
             new ProophFixturesBundle(),
         ];
     }
 
-    public function registerServices(callable $callback) : void
+    public function registerServices(callable $callback): void
     {
         $this->registerServicesCallback = $callback;
     }
@@ -46,16 +55,16 @@ class ProophFixturesTestingKernel extends Kernel
 
     public function getCacheDir()
     {
-        return sprintf('%s/%s', parent::getCacheDir(), spl_object_hash($this));
+        return \sprintf('%s/%s', parent::getCacheDir(), \spl_object_hash($this));
     }
 
     private function getRegisterServicesCallback()
     {
-        if (is_callable($this->registerServicesCallback)) {
+        if (\is_callable($this->registerServicesCallback)) {
             return $this->registerServicesCallback;
         }
 
-        return static function(ContainerBuilder $container) {
+        return static function (ContainerBuilder $container) {
         };
     }
 }

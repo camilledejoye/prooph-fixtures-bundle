@@ -1,14 +1,23 @@
 <?php
 
+/**
+ * This file is part of elythy/prooph-fixtures-bundle.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+declare(strict_types=1);
+
 namespace Prooph\Bundle\Fixtures\Tests\DependencyInjection;
 
 use PHPUnit\Framework\TestCase;
 use Prooph\Bundle\Fixtures\Tests\Fixtures\AFixture;
 use Prooph\Bundle\Fixtures\Tests\Fixtures\AnotherFixture;
+use Prooph\Bundle\Fixtures\Tests\ProophFixturesTestingKernel;
 use Prooph\Fixtures\Locator\FixturesLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Prooph\Bundle\Fixtures\Tests\ProophFixturesTestingKernel;
 
 class ProophFixturesExtensionTest extends TestCase
 {
@@ -22,7 +31,7 @@ class ProophFixturesExtensionTest extends TestCase
         $batchesSize = 63217;
 
         $container = $this->loadContainerFromServicesRegistration(
-            static function (ContainerBuilder $container) use ($batchesSize) : void {
+            static function (ContainerBuilder $container) use ($batchesSize): void {
                 $container->setParameter('prooph_fixtures.batches_size', $batchesSize);
             }
         );
@@ -38,12 +47,10 @@ class ProophFixturesExtensionTest extends TestCase
         $container = $this->loadContainerFromServicesRegistration(
             static function (ContainerBuilder $container): void {
                 $container->autowire(AFixture::class)
-                    ->addTag(self::FIXTURES_TAG)
-                    ;
+                    ->addTag(self::FIXTURES_TAG);
 
                 $container->autowire(AnotherFixture::class)
-                    ->addTag(self::FIXTURES_TAG)
-                    ;
+                    ->addTag(self::FIXTURES_TAG);
             }
         );
 
@@ -51,7 +58,7 @@ class ProophFixturesExtensionTest extends TestCase
         $fixtures = $fixturesLocator->getFixtures();
 
         $this->assertCount(2, $fixtures);
-        $this->assertSame([AFixture::class, AnotherFixture::class,], array_keys($fixtures));
+        $this->assertSame([AFixture::class, AnotherFixture::class], \array_keys($fixtures));
     }
 
     /**
@@ -62,20 +69,20 @@ class ProophFixturesExtensionTest extends TestCase
         $container = $this->loadContainerFromServicesRegistration(
             static function (ContainerBuilder $container): void {
                 $container->autowire(AFixture::class)
-                    ->setAutoconfigured(true)
-                    ;
+                    ->setAutoconfigured(true);
             }
         );
 
         $fixturesLocator = $this->getFixturesLocator($container);
         $fixtures = $fixturesLocator->getFixtures();
 
-        $this->assertContains(AFixture::class, array_keys($fixtures));
+        $this->assertContains(AFixture::class, \array_keys($fixtures));
     }
 
     private function getFixturesLocator(ContainerInterface $container): FixturesLocator
     {
         $fixturesLocator = $container->get(ProophFixturesTestingKernel::FIXTURES_LOCATOR_ID);
+
         return $fixturesLocator;
     }
 
