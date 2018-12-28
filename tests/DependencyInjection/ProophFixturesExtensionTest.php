@@ -4,6 +4,7 @@ namespace Prooph\Bundle\Fixtures\Tests\DependencyInjection;
 
 use PHPUnit\Framework\TestCase;
 use Prooph\Bundle\Fixtures\Tests\Fixtures\AFixture;
+use Prooph\Bundle\Fixtures\Tests\Fixtures\AnotherFixture;
 use Prooph\Fixtures\Locator\FixturesLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -11,6 +12,32 @@ use Prooph\Bundle\Fixtures\Tests\ProophFixturesTestingKernel;
 
 class ProophFixturesExtensionTest extends TestCase
 {
+    const FIXTURES_TAG = 'prooph_fixtures.fixtures';
+
+    /**
+     * @test
+     */
+    public function it_provides_tagged_fixtures_to_the_locator()
+    {
+        $container = $this->loadContainerFromServicesRegistration(
+            static function (ContainerBuilder $container): void {
+                $container->autowire(AFixture::class)
+                    ->addTag(self::FIXTURES_TAG)
+                    ;
+
+                $container->autowire(AnotherFixture::class)
+                    ->addTag(self::FIXTURES_TAG)
+                    ;
+            }
+        );
+
+        $fixturesLocator = $this->getFixturesLocator($container);
+        $fixtures = $fixturesLocator->getFixtures();
+
+        $this->assertCount(2, $fixtures);
+        $this->assertSame([AFixture::class, AnotherFixture::class,], array_keys($fixtures));
+    }
+
     /**
      * @test
      */
