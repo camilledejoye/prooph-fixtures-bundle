@@ -1,4 +1,6 @@
 # Prooph Fixtures Bundle
+[![Build Status](https://travis-ci.org/elythyr/prooph-fixtures-bundle.svg?branch=master)](https://travis-ci.org/elythyr/prooph-fixtures-bundle)
+[![Coverage Status](https://coveralls.io/repos/github/elythyr/prooph-fixtures-bundle/badge.svg?branch=master)](https://coveralls.io/github/elythyr/prooph-fixtures-bundle?branch=master)
 
 Symfony's Bundle for [Prooph Fixtures](https://github.com/elythyr/prooph-fixtures).
 
@@ -11,17 +13,6 @@ and providing a console command to load all your fixtures.
 ```shell
 composer require --dev elythyr/prooph-fixtures-bundle
 ```
-
-If you have an error related to the minimum stability, it's because I haven't created
-a stable release yet... :innocent:
-In this case, if you are feeling adventurous just require the latest dev commit:
-
-```shell
-composer require --dev elythyr/prooph-fixtures-bundle:*@dev
-```
-
-Note: With some shell, ZSH for instance, you might have an error with the last one.
-Just surround the package name (and version) with quotes.
 
 
 ## Configuration
@@ -59,8 +50,8 @@ php bin/console event-store:fixtures:load
 
 ## Todo
 
-- [ ] Adds CI with Travis
-- [ ] Adds tests coverage
-- [ ] Make a first release
-- [ ] Publish to packagist
+- [x] Adds CI with Travis
+- [x] Adds tests coverage
+- [x] Make a first release
+- [x] Publish to packagist
 - [ ] \(Wondering) Adds events before/after: cleaning, loading all fixtures, loagin each fixture
