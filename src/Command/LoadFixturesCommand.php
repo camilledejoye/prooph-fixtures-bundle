@@ -24,7 +24,12 @@ class LoadFixturesCommand extends Command
 {
     use LockableTrait;
 
-    protected static $defaultName = 'event-store:fixtures:load';
+    const NAME = 'event-store:fixtures:load';
+    const EXIT_OK = 0;
+    const EXIT_LOCK = 1;
+    const EXIT_NO_FIXTURES = 2;
+
+    protected static $defaultName = self::NAME;
 
     /**
      * @var FixturesManager
@@ -57,43 +62,58 @@ class LoadFixturesCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $io = new SymfonyStyle($input, $output);
+        try {
+            $io = new SymfonyStyle($input, $output);
 
-        $io->title('Prooph fixtures loading');
+            $io->title('Prooph fixtures loading');
 
-        if (! $this->lock()) {
-            $io->error('The command is already running in another process.');
+            if (! $this->lock(null, false)) {
+                $io->error('The command is already running in another process.');
 
-            return 0;
-        }
-
-        if (! $this->advertiseAndAskConformation($io)) {
-            return;
-        }
-
-        $this->fixturesManager->cleanUp();
-
-        if (! $fixtures = $this->fixturesManager->getFixtures()) {
-            $io->error('There is no fixtures defined!');
-
-            return 0;
-        }
-
-        foreach ($fixtures as $fixture) {
-            try {
-                $io->write(\sprintf(
-                    ' <comment>></comment> <fg=blue>Loading fixture <comment>%s</comment>:</> ',
-                    $fixture->getName()
-                ));
-                $fixture->load();
-                $io->writeln('<fg=green>OK</>');
-            } catch (Throwable $exception) {
-                $io->writeln('<fg=red>KO</>');
-                throw $exception;
+                return self::EXIT_LOCK;
             }
-        }
 
-        $io->success('Fixtures loaded without errors !');
+            if (! $fixtures = $this->fixturesManager->getFixtures()) {
+                $io->error('There is no fixtures defined!');
+
+                $this->release();
+
+                return self::EXIT_NO_FIXTURES;
+            }
+
+            if ($input->isInteractive() && ! $this->advertiseAndAskConformation($io)) {
+                $io->comment('The desaster was avoided!');
+
+                $this->release();
+
+                return self::EXIT_OK;
+            }
+
+            $this->fixturesManager->cleanUp();
+
+            foreach ($fixtures as $fixture) {
+                try {
+                    $io->write(\sprintf(
+                        ' <comment>></comment> <fg=blue>Loading fixture <comment>%s</comment>:</> ',
+                        $fixture->getName()
+                    ));
+                    $fixture->load();
+                    $io->writeln('<fg=green>OK</>');
+                } catch (Throwable $error) {
+                    $io->writeln('<fg=red>KO</>');
+                    throw $error;
+                }
+            }
+
+            $io->success('Fixtures loaded without errors!');
+
+            $this->release();
+
+            return self::EXIT_OK;
+        } catch (Throwable $error) {
+            $this->release();
+            throw $error;
+        }
     }
 
     /**
