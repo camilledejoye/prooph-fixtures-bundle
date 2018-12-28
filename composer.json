@@ -11,8 +11,8 @@
     ],
     "repositories": [
         {
-            "type": "path",
-            "url": "../prooph-fixtures"
+            "type": "vcs",
+            "url": "https://github.com/elythyr/prooph-fixtures.git"
         }
     ],
     "require": {
