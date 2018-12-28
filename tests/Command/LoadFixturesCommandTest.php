@@ -15,8 +15,6 @@ use PHPUnit\Framework\TestCase;
 use Prooph\Bundle\Fixtures\Command\LoadFixturesCommand;
 use Prooph\Bundle\Fixtures\Tests\Fixtures\AFixture;
 use Prooph\Bundle\Fixtures\Tests\Fixtures\AnotherFixture;
-use Prooph\Bundle\Fixtures\Tests\Fixtures\DummyEventStore;
-use Prooph\Bundle\Fixtures\Tests\Fixtures\DummyProjectionManagersLocator;
 use Prooph\Bundle\Fixtures\Tests\ProophFixturesTestingKernel;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\LockableTrait;
@@ -126,12 +124,6 @@ class LoadFixturesCommandTest extends TestCase
         $kernel = new ProophFixturesTestingKernel('test', true);
         $kernel->registerServices(
             static function (ContainerBuilder $container) use ($registerFixtures) {
-                $container->register('Prooph\EventStore\EventStore', DummyEventStore::class);
-                $container->register(
-                    'prooph_event_store.projection_managers_locator',
-                    DummyProjectionManagersLocator::class
-                );
-
                 $container->setAlias(
                     'test.command.load_fixtures',
                     new Alias('Prooph\Bundle\Fixtures\Command\LoadFixturesCommand', true)

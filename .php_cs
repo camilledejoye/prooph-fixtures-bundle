@@ -3,7 +3,8 @@
 $config = new Prooph\CS\Config\Prooph();
 $config->getFinder()
     ->in(__DIR__)
-    ->exclude('var');
+    ->exclude('var')
+    ->exclude('tests/cache');
 
 $cacheDir = getenv('TRAVIS') ? getenv('HOME') . '/.php-cs-fixer' : __DIR__;
 

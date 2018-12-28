@@ -12,6 +12,8 @@ declare(strict_types=1);
 namespace Prooph\Bundle\Fixtures\Tests;
 
 use Prooph\Bundle\Fixtures\ProophFixturesBundle;
+use Prooph\Bundle\Fixtures\Tests\Fixtures\DummyEventStore;
+use Prooph\Bundle\Fixtures\Tests\Fixtures\DummyProjectionManagersLocator;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -42,6 +44,12 @@ class ProophFixturesTestingKernel extends Kernel
     public function registerContainerConfiguration(LoaderInterface $loader)
     {
         $loader->load(function (ContainerBuilder $container): void {
+            $container->register('Prooph\EventStore\EventStore', DummyEventStore::class);
+            $container->register(
+                'prooph_event_store.projection_managers_locator',
+                DummyProjectionManagersLocator::class
+            );
+
             $this->getRegisterServicesCallback()($container);
 
             $container->setParameter('prooph_event_store.projection_managers', []);
