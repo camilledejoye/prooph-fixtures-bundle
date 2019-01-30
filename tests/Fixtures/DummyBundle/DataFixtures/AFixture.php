@@ -9,11 +9,11 @@
 
 declare(strict_types=1);
 
-namespace Prooph\Bundle\Fixtures\Tests\Fixtures;
+namespace DummyBundle\DataFixtures;
 
 use Prooph\Fixtures\Fixture\Fixture;
 
-class AnotherFixture implements Fixture
+class AFixture implements Fixture
 {
     /**
      * {@inheritdoc}
@@ -27,6 +27,6 @@ class AnotherFixture implements Fixture
      */
     public function getName(): string
     {
-        return 'AnotherFixture';
+        return 'AFixture';
     }
 }

@@ -11,11 +11,11 @@ declare(strict_types=1);
 
 namespace Prooph\Bundle\Fixtures\Tests\DependencyInjection;
 
+use DummyBundle\DataFixtures\AFixture;
+use DummyBundle\DataFixtures\AnotherFixture;
 use PHPUnit\Framework\TestCase;
-use Prooph\Bundle\Fixtures\Tests\Fixtures\AFixture;
-use Prooph\Bundle\Fixtures\Tests\Fixtures\AnotherFixture;
 use Prooph\Bundle\Fixtures\Tests\ProophFixturesTestingKernel;
-use Prooph\Fixtures\Locator\FixturesLocator;
+use Prooph\Fixtures\Provider\FixturesProvider;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -42,7 +42,7 @@ class ProophFixturesExtensionTest extends TestCase
     /**
      * @test
      */
-    public function it_provides_tagged_fixtures_to_the_locator()
+    public function it_provides_tagged_fixtures_to_the_provider()
     {
         $container = $this->loadContainerFromServicesRegistration(
             static function (ContainerBuilder $container): void {
@@ -54,8 +54,8 @@ class ProophFixturesExtensionTest extends TestCase
             }
         );
 
-        $fixturesLocator = $this->getFixturesLocator($container);
-        $fixtures = $fixturesLocator->getFixtures();
+        $fixturesProvider = $this->getFixturesProvider($container);
+        $fixtures = $fixturesProvider->all();
 
         $this->assertCount(2, $fixtures);
         $this->assertSame([AFixture::class, AnotherFixture::class], \array_keys($fixtures));
@@ -73,17 +73,17 @@ class ProophFixturesExtensionTest extends TestCase
             }
         );
 
-        $fixturesLocator = $this->getFixturesLocator($container);
-        $fixtures = $fixturesLocator->getFixtures();
+        $fixturesProvider = $this->getFixturesProvider($container);
+        $fixtures = $fixturesProvider->all();
 
         $this->assertContains(AFixture::class, \array_keys($fixtures));
     }
 
-    private function getFixturesLocator(ContainerInterface $container): FixturesLocator
+    private function getFixturesProvider(ContainerInterface $container): FixturesProvider
     {
-        $fixturesLocator = $container->get(ProophFixturesTestingKernel::FIXTURES_LOCATOR_ID);
+        $fixturesProvider = $container->get(ProophFixturesTestingKernel::FIXTURES_PROVIDER_ID);
 
-        return $fixturesLocator;
+        return $fixturesProvider;
     }
 
     private function loadContainerFromServicesRegistration($registerServices): ContainerInterface

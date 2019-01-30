@@ -11,10 +11,10 @@ declare(strict_types=1);
 
 namespace Prooph\Bundle\Fixtures\Tests\Command;
 
+use DummyBundle\DataFixtures\AFixture;
+use DummyBundle\DataFixtures\AnotherFixture;
 use PHPUnit\Framework\TestCase;
 use Prooph\Bundle\Fixtures\Command\LoadFixturesCommand;
-use Prooph\Bundle\Fixtures\Tests\Fixtures\AFixture;
-use Prooph\Bundle\Fixtures\Tests\Fixtures\AnotherFixture;
 use Prooph\Bundle\Fixtures\Tests\ProophFixturesTestingKernel;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\LockableTrait;

@@ -9,16 +9,35 @@
     </parameters>
 
     <services>
+    <!-- Projections -->
+        <service id="prooph_fixtures.projection_factory" class="Prooph\Bundle\Fixtures\Projection\ProjectionFactory">
+            <argument type="service" id="prooph_event_store.projections_locator" />
+            <argument type="service" id="prooph_event_store.projection_manager_for_projections_locator" />
+            <argument type="service" id="prooph_event_store.projection_read_models_locator" />
+        </service>
+
+        <service id="prooph_fixtures.projections_names_provider" class="Prooph\Bundle\Fixtures\Projection\ProjectionsNamesProvider">
+            <argument type="service" id="prooph_event_store.projection_managers_locator" />
+            <argument>%prooph_event_store.projection_managers%</argument>
+            <argument>%prooph_fixtures.batches_size%</argument>
+        </service>
+
     <!-- Cleaners -->
         <service id="prooph_fixtures.event_streams_cleaner" class="Prooph\Fixtures\Cleaner\EventStreamsCleaner">
             <argument type="service" id="Prooph\EventStore\EventStore" />
             <argument>%prooph_fixtures.batches_size%</argument>
         </service>
 
+        <service id="prooph_fixtures.pdo_cleaning_projection_strategy" class="Prooph\Bundle\Fixtures\Cleaner\PdoCleaningProjectionStrategy">
+            <argument type="service" id="prooph_event_store.projection_manager_for_projections_locator" />
+            <argument type="service" id="prooph_fixtures.projection_factory" />
+        </service>
+
+        <service id="prooph_fixtures.cleaning_projection_strategy" alias="prooph_fixtures.pdo_cleaning_projection_strategy" />
+
         <service id="prooph_fixtures.projections_cleaner" class="Prooph\Fixtures\Cleaner\ProjectionsCleaner">
-            <argument type="service" id="prooph_event_store.projection_managers_locator" />
-            <argument>%prooph_event_store.projection_managers%</argument>
-            <argument>%prooph_fixtures.batches_size%</argument>
+            <argument type="service" id="prooph_fixtures.cleaning_projection_strategy" />
+            <argument type="expression">service('prooph_fixtures.projections_names_provider').getNames()</argument>
         </service>
 
         <service id="prooph_fixtures.chain_cleaner" class="Prooph\Fixtures\Cleaner\ChainCleaner">
@@ -31,19 +50,22 @@
         <service id="prooph_fixtures.cleaner" alias="prooph_fixtures.chain_cleaner" />
 
 
-        <service id="prooph_fixtures.in_memory_fixtures_locator" class="Prooph\Fixtures\Locator\InMemoryFixturesLocator">
+    <!-- Fixtures provider -->
+        <service id="prooph_fixtures.in_memory_fixtures_provider" class="Prooph\Fixtures\Provider\InMemoryFixturesProvider">
             <argument type="tagged" tag="prooph_fixtures.fixtures" />
         </service>
 
-        <service id="prooph_fixtures.fixtures_locator" alias="prooph_fixtures.in_memory_fixtures_locator" />
+        <service id="prooph_fixtures.fixtures_provider" alias="prooph_fixtures.in_memory_fixtures_provider" />
 
 
+    <!-- Fixtures manager -->
         <service id="prooph_fixtures.fixtures_manager" class="Prooph\Fixtures\FixturesManager">
-            <argument type="service" id="prooph_fixtures.fixtures_locator" />
+            <argument type="service" id="prooph_fixtures.fixtures_provider" />
             <argument type="service" id="prooph_fixtures.cleaner" />
         </service>
 
 
+    <!-- Console commands -->
         <service id="Prooph\Bundle\Fixtures\Command\LoadFixturesCommand">
             <argument type="service" id="prooph_fixtures.fixtures_manager" />
             <tag name="console.command" command="event-store:fixtures:load" />

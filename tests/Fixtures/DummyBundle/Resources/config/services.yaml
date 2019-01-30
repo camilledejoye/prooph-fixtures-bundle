@@ -1,0 +1,32 @@
+parameters:
+    prooph_event_store.projection_managers: []
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    DummyBundle\:
+        resource: '../../*'
+        exclude: '../../DataFixtures/*'
+
+    Prooph\EventStore\EventStore: '@DummyBundle\DummyEventStore'
+
+    prooph_event_store.projection_managers_locator: '@DummyBundle\DummyProjectionManagersLocator'
+
+    prooph_event_store.projections_locator:
+        class: Symfony\Component\DependencyInjection\ServiceLocator
+        arguments: [ [] ]
+
+    prooph_event_store.projection_manager_for_projections_locator:
+        class: Symfony\Component\DependencyInjection\ServiceLocator
+        arguments: [ [] ]
+
+    prooph_event_store.projection_read_models_locator:
+        class: Symfony\Component\DependencyInjection\ServiceLocator
+        arguments: [ [] ]
+
+    test.prooph_fixtures.fixtures_provider:
+        alias: prooph_fixtures.fixtures_provider
+        public: true

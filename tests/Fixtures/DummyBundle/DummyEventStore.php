@@ -9,7 +9,7 @@
 
 declare(strict_types=1);
 
-namespace Prooph\Bundle\Fixtures\Tests\Fixtures;
+namespace DummyBundle;
 
 use Iterator;
 use Prooph\EventStore\EventStore;

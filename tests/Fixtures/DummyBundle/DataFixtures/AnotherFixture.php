@@ -9,25 +9,24 @@
 
 declare(strict_types=1);
 
-namespace Prooph\Bundle\Fixtures\Tests\Fixtures;
+namespace DummyBundle\DataFixtures;
 
-use Psr\Container\ContainerInterface;
+use Prooph\Fixtures\Fixture\Fixture;
 
-class DummyProjectionManagersLocator implements ContainerInterface
+class AnotherFixture implements Fixture
 {
     /**
      * {@inheritdoc}
      */
-    public function get($id)
+    public function load(): void
     {
-        /* return new DummyProjectionManager(); */
     }
 
     /**
      * {@inheritdoc}
      */
-    public function has($id)
+    public function getName(): string
     {
-        return 'test_manager' === $id;
+        return 'AnotherFixture';
     }
 }
