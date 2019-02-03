@@ -11,6 +11,7 @@
     ],
     "require": {
         "php": "^7.1.3",
+        "elythyr/prooph-fixtures": "@dev",
         "prooph/event-store-symfony-bundle": "^0.5.0",
         "symfony/console": "^3.4 || ^4.0",
         "symfony/dependency-injection": "^3.4 || ^4.0",
@@ -19,7 +20,6 @@
         "symfony/lock": "^3.4 || ^4.0"
     },
     "require-dev": {
-        "elythyr/prooph-fixtures": "@dev",
         "php-coveralls/php-coveralls": "^2.1",
         "phpunit/php-invoker": "^2.0",
         "phpunit/phpunit": "^7.5",
