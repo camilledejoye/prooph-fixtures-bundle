@@ -30,3 +30,7 @@ services:
     test.prooph_fixtures.fixtures_provider:
         alias: prooph_fixtures.fixtures_provider
         public: true
+
+    test.command.load_fixtures:
+        alias: Prooph\Bundle\Fixtures\Command\LoadFixturesCommand
+        public: true

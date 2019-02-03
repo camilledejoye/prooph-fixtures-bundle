@@ -13,17 +13,22 @@ namespace Prooph\Bundle\Fixtures\Tests\Command;
 
 use DummyBundle\DataFixtures\AFixture;
 use DummyBundle\DataFixtures\AnotherFixture;
+use DummyBundle\DataFixtures\FailingFixture;
+use Exception;
 use PHPUnit\Framework\TestCase;
 use Prooph\Bundle\Fixtures\Command\LoadFixturesCommand;
 use Prooph\Bundle\Fixtures\Tests\ProophFixturesTestingKernel;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\LockableTrait;
 use Symfony\Component\Console\Tester\CommandTester;
-use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class LoadFixturesCommandTest extends TestCase
 {
+    const EXIT_OK = 0;
+    const EXIT_LOCK = 1;
+    const EXIT_NO_FIXTURES = 2;
+
     /**
      * @test
      */
@@ -35,7 +40,7 @@ class LoadFixturesCommandTest extends TestCase
             'There is no fixtures defined!',
             $commandTester->getDisplay()
         );
-        $this->assertSame(2, $commandTester->getStatusCode());
+        $this->assertSame(self::EXIT_NO_FIXTURES, $commandTester->getStatusCode());
     }
 
     /**
@@ -63,7 +68,7 @@ class LoadFixturesCommandTest extends TestCase
             'The command is already running in another process.',
             $commandTester->getDisplay()
         );
-        $this->assertSame(1, $commandTester->getStatusCode());
+        $this->assertSame(self::EXIT_LOCK, $commandTester->getStatusCode());
     }
 
     /**
@@ -71,13 +76,17 @@ class LoadFixturesCommandTest extends TestCase
      */
     public function it_ask_confirmation_before_doing_anything()
     {
-        $commandTester = $this->runCommandTester(true, ['n']);
+        $registerServices = function (ContainerBuilder $container) {
+            $this->registerFixtures($container, [AFixture::class, AnotherFixture::class]);
+        };
+
+        $commandTester = $this->runCommandTester($registerServices, ['n']);
 
         $this->assertContains(
             'The desaster was avoided!',
             $commandTester->getDisplay()
         );
-        $this->assertSame(0, $commandTester->getStatusCode());
+        $this->assertSame(self::EXIT_OK, $commandTester->getStatusCode());
     }
 
     /**
@@ -85,7 +94,11 @@ class LoadFixturesCommandTest extends TestCase
      */
     public function it_loads_the_fixtures()
     {
-        $commandTester = $this->runCommandTester(true, ['y']);
+        $registerServices = function (ContainerBuilder $container) {
+            $this->registerFixtures($container, [AFixture::class, AnotherFixture::class]);
+        };
+
+        $commandTester = $this->runCommandTester($registerServices, ['y']);
 
         $this->assertContains(
             'Loading fixture AFixture: OK',
@@ -99,7 +112,37 @@ class LoadFixturesCommandTest extends TestCase
             'Fixtures loaded without errors!',
             $commandTester->getDisplay()
         );
-        $this->assertSame(0, $commandTester->getStatusCode());
+        $this->assertSame(self::EXIT_OK, $commandTester->getStatusCode());
+    }
+
+    /**
+     * @test
+     */
+    public function it_shows_an_error_when_an_exception_append()
+    {
+        $registerServices = function (ContainerBuilder $container) {
+            $this->registerFixtures($container, [AFixture::class, FailingFixture::class]);
+        };
+
+        $commandTester = $this->runCommandTester($registerServices, ['y']);
+
+        $this->assertContains(
+            'Loading fixture AFixture: OK',
+            $commandTester->getDisplay()
+        );
+        $this->assertContains(
+            'Loading fixture FailingFixture: KO',
+            $commandTester->getDisplay()
+        );
+        $this->assertContains(
+            'In FailingFixture.php line 24:',
+            $commandTester->getDisplay()
+        );
+        $this->assertContains(
+            'Something went wrong!',
+            $commandTester->getDisplay()
+        );
+        $this->assertNull($commandTester->getStatusCode());
     }
 
     /**
@@ -107,37 +150,38 @@ class LoadFixturesCommandTest extends TestCase
      */
     public function it_does_not_ask_confirmation_in_noninteractive_mode()
     {
-        $commandTester = $this->runCommandTester(true, [], ['interactive' => false]);
+        $registerServices = function (ContainerBuilder $container) {
+            $this->registerFixtures($container, [AFixture::class, AnotherFixture::class]);
+        };
+
+        $commandTester = $this->runCommandTester($registerServices, [], ['interactive' => false]);
 
         $this->assertContains(
             'Fixtures loaded without errors!',
             $commandTester->getDisplay()
         );
-        $this->assertSame(0, $commandTester->getStatusCode());
+        $this->assertSame(self::EXIT_OK, $commandTester->getStatusCode());
+    }
+
+    private function registerFixtures(ContainerBuilder $container, iterable $fixturesFqn): void
+    {
+        foreach ($fixturesFqn as $fixtureFqn) {
+            $container->autowire($fixtureFqn)
+                ->setAutoconfigured(true);
+        }
     }
 
     private function runCommandTester(
-        bool $registerFixtures = false,
+        callable $registerServices = null,
         array $inputs = [],
         array $options = []
     ): CommandTester {
         $kernel = new ProophFixturesTestingKernel('test', true);
-        $kernel->registerServices(
-            static function (ContainerBuilder $container) use ($registerFixtures) {
-                $container->setAlias(
-                    'test.command.load_fixtures',
-                    new Alias('Prooph\Bundle\Fixtures\Command\LoadFixturesCommand', true)
-                );
 
-                if ($registerFixtures) {
-                    $container->autowire(AFixture::class)
-                        ->setAutoconfigured(true);
+        if (\is_callable($registerServices)) {
+            $kernel->registerServices($registerServices);
+        }
 
-                    $container->autowire(AnotherFixture::class)
-                        ->setAutoconfigured(true);
-                }
-            }
-        );
         $kernel->boot();
 
         $command = $kernel->getContainer()->get('test.command.load_fixtures');
@@ -151,10 +195,14 @@ class LoadFixturesCommandTest extends TestCase
             $commandTester->setInputs($inputs);
         }
 
-        $commandTester->execute(
-            ['command' => $command->getName()],
-            $options
-        );
+        try {
+            $commandTester->execute(
+                ['command' => $command->getName()],
+                $options
+            );
+        } catch (Exception $exception) {
+            $application->renderException($exception, $commandTester->getOutput());
+        }
 
         return $commandTester;
     }
