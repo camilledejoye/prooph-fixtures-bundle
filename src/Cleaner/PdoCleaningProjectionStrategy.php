@@ -19,6 +19,7 @@ use Prooph\Fixtures\Cleaner\CleaningProjectionStrategy;
 use Prooph\Fixtures\Cleaner\Exception\CleaningProjectionFailed;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\DependencyInjection\ServiceLocator;
+use Throwable;
 
 /**
  * Implementation of the strategy to clean projections from the PDO

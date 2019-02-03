@@ -11,14 +11,17 @@ declare(strict_types=1);
 
 namespace Prooph\Bundle\Fixtures\Tests\Cleaner;
 
+use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Prooph\Bundle\Fixtures\Cleaner\PdoCleaningProjectionStrategy;
 use Prooph\Bundle\Fixtures\Projection\ProjectionFactory;
+use Prooph\EventStore\Exception\ProjectionNotFound;
 use Prooph\EventStore\Projection\ProjectionManager;
 use Prooph\EventStore\Projection\ProjectionStatus;
 use Prooph\EventStore\Projection\Projector;
 use Prooph\EventStore\Projection\ReadModelProjector;
+use Prooph\Fixtures\Cleaner\Exception\CleaningProjectionFailed;
 use Symfony\Component\DependencyInjection\ServiceLocator;
 
 class PdoCleaningProjectionStrategyTest extends TestCase
@@ -64,6 +67,55 @@ class PdoCleaningProjectionStrategyTest extends TestCase
             ->method('reset');
 
         $cleaningStrategy->clean($projectionName);
+    }
+
+    /**
+     * @test
+     */
+    public function it_should_not_find_the_projection()
+    {
+        $projector = $this->createAProjector();
+
+        $projectionManager = $this->createAProjectionManager(ProjectionStatus::IDLE());
+        $projectionManagersLocator = $this->createAProjectionManagersLocator($projectionManager);
+        $projectionFactory = $this->createAProjectionFactory($projector);
+
+        $projectionName = 'projection that does not exist';
+        $projectionFactory->expects($this->any())
+            ->method('createByName')
+            ->willThrowException(ProjectionNotFound::withName($projectionName));
+
+        $cleaningStrategy = $this->createASut($projectionManagersLocator, $projectionFactory);
+
+        $this->expectException(ProjectionNotFound::class);
+        $this->expectExceptionMessage(\sprintf(
+            'A projection with name "%s" could not be found.',
+            $projectionName
+        ));
+
+        $cleaningStrategy->clean($projectionName);
+    }
+
+    /**
+     * @test
+     */
+    public function it_should_not_find_the_projection_manager()
+    {
+        $projector = $this->createAProjector();
+
+        $projectionManager = $this->createAProjectionManager(ProjectionStatus::IDLE());
+        $projectionManagersLocator = $this->createAProjectionManagersLocator($projectionManager);
+        $projectionFactory = $this->createAProjectionFactory($projector);
+
+        $cleaningStrategy = $this->createASut($projectionManagersLocator, $projectionFactory);
+
+        $projectionManagersLocator->expects($this->any())
+            ->method('get')
+            ->willThrowException(new Exception('That does not matter'));
+
+        $this->expectException(CleaningProjectionFailed::class);
+
+        $cleaningStrategy->clean('a projection');
     }
 
     public function provideProjectors(): array
